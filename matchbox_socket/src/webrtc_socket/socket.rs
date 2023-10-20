@@ -8,7 +8,7 @@ use crate::{
 };
 use futures::{future::Fuse, select, Future, FutureExt, StreamExt};
 use futures_channel::mpsc::{UnboundedReceiver, UnboundedSender};
-use log::{debug, error};
+use log::{debug, error, warn};
 use matchbox_protocol::PeerId;
 use std::{collections::HashMap, marker::PhantomData, pin::Pin, time::Duration};
 
@@ -348,7 +348,9 @@ impl WebRtcChannel {
 
     /// Send a packet to the given peer.
     pub fn send(&mut self, packet: Packet, peer: PeerId) {
-        self.tx.unbounded_send((peer, packet)).expect("Send failed");
+        if self.tx.unbounded_send((peer, packet)).is_err() {
+            warn!("send failed");
+        }
     }
 }
 
